@@ -27,15 +27,13 @@ pnpm demo:home-to-profile
 .
 ├── docs/
 │   └── 01-android-device-and-first-demo.md
+├── cases/
+│   └── 01-home-to-profile.yaml
 ├── src/
-│   ├── config/
-│   │   └── android-agent.ts
-│   ├── check-android.ts
-│   └── demos/
-│       └── 01-home-to-profile.ts
+│   └── check-android.ts
 ├── .env.example
 ├── package.json
 └── tsconfig.json
 ```
 
-后续阶段将在首个 Demo 通过后继续加入：App 导航文档、真实基础用例、新需求文档，以及基于已有知识泛化生成的新用例。
+后续阶段将在首个 YAML Case 通过后继续加入：App 导航文档、真实基础用例、新需求文档，以及基于已有知识泛化生成的新用例。

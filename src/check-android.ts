@@ -4,10 +4,8 @@ import { spawnSync } from 'node:child_process';
 import { accessSync, constants } from 'node:fs';
 import path from 'node:path';
 import { getConnectedDevices } from '@midscene/android';
-import {
-  getAndroidScreenshotShrinkFactor,
-  getShrunkScreenshotSize,
-} from './config/android-agent.js';
+
+const SCREENSHOT_SHRINK_FACTOR = 2;
 
 const requiredModelVariables = [
   'MIDSCENE_MODEL_BASE_URL',
@@ -68,14 +66,7 @@ function checkTouchInjection(
 
 async function main() {
   const problems: string[] = [];
-  let screenshotShrinkFactor: number | undefined;
-
-  try {
-    screenshotShrinkFactor = getAndroidScreenshotShrinkFactor();
-    ok(`Android 截图压缩倍率：${screenshotShrinkFactor}`);
-  } catch (error) {
-    problems.push(error instanceof Error ? error.message : String(error));
-  }
+  ok(`Android 截图压缩倍率：${SCREENSHOT_SHRINK_FACTOR}`);
 
   const androidHome = process.env.ANDROID_HOME || process.env.ANDROID_SDK_ROOT;
   if (!androidHome) {
@@ -131,24 +122,21 @@ async function main() {
 
       try {
         const screenSize = getPhysicalScreenSize(selectedDevice.udid);
-        if (screenshotShrinkFactor !== undefined) {
-          const shrunkSize = getShrunkScreenshotSize(
-            screenSize.width,
-            screenSize.height,
-            screenshotShrinkFactor,
-          );
-          ok(
-            `发送给模型的截图尺寸：${screenSize.width}x${screenSize.height} -> ${shrunkSize.width}x${shrunkSize.height}`,
-          );
+        const shrunkSize = {
+          width: Math.round(screenSize.width / SCREENSHOT_SHRINK_FACTOR),
+          height: Math.round(screenSize.height / SCREENSHOT_SHRINK_FACTOR),
+        };
+        ok(
+          `发送给模型的截图尺寸：${screenSize.width}x${screenSize.height} -> ${shrunkSize.width}x${shrunkSize.height}`,
+        );
 
-          if (
-            process.env.MIDSCENE_MODEL_FAMILY === 'gpt-5' &&
-            Math.min(shrunkSize.width, shrunkSize.height) > 768
-          ) {
-            problems.push(
-              `压缩后的截图短边仍大于 768px，GPT-5 兼容服务可能再次缩放图片并造成点击偏移。请提高 ANDROID_SCREENSHOT_SHRINK_FACTOR。`,
-            );
-          }
+        if (
+          process.env.MIDSCENE_MODEL_FAMILY === 'gpt-5' &&
+          Math.min(shrunkSize.width, shrunkSize.height) > 768
+        ) {
+          problems.push(
+            `使用 screenshotShrinkFactor: ${SCREENSHOT_SHRINK_FACTOR} 后截图短边仍大于 768px，GPT-5 兼容服务可能再次缩放图片并造成点击偏移。请根据文档调整 YAML Case。`,
+          );
         }
 
         checkTouchInjection(selectedDevice.udid, screenSize);

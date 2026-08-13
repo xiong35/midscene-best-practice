@@ -1,6 +1,6 @@
 # 第一步：连接 Android 真机并运行首个 Demo
 
-这一阶段模拟用户第一次使用 Midscene：在 Mac 上连接一台 Android 真机，使用 Midscene Studio 验证设备，然后运行一条可复现脚本，从懂车帝首页进入“我的”页面。
+这一阶段模拟用户第一次使用 Midscene：在 Mac 上连接一台 Android 真机，使用 Midscene Studio 验证设备，然后运行一条可复现的 YAML Case，从懂车帝首页进入“我的”页面。
 
 完成后应得到两个结果：
 
@@ -117,7 +117,6 @@ MIDSCENE_MODEL_BASE_URL="你的模型服务地址"
 MIDSCENE_MODEL_API_KEY="你的 API Key"
 MIDSCENE_MODEL_NAME="模型名称"
 MIDSCENE_MODEL_FAMILY="正确的模型系列"
-ANDROID_SCREENSHOT_SHRINK_FACTOR="2"
 ANDROID_DEVICE_ID=""
 DONGCHEDI_PACKAGE="com.ss.android.auto"
 ```
@@ -128,17 +127,18 @@ DONGCHEDI_PACKAGE="com.ss.android.auto"
 - 只连接一台设备时可以不填 `ANDROID_DEVICE_ID`。
 - 多台设备同时连接时，从 `adb devices -l` 复制目标设备 ID。
 - `MIDSCENE_MODEL_FAMILY` 配置错误会导致视觉定位明显偏移。
-- `ANDROID_SCREENSHOT_SHRINK_FACTOR` 是本仓库的配置，代码会将它传给 `AndroidAgent`；它不是 Midscene 自动读取的环境变量。
+- `ANDROID_DEVICE_ID` 和 `DONGCHEDI_PACKAGE` 会替换 YAML Case 中的同名占位符；它们不是 Midscene 自动识别的标准环境变量。
 - `.env` 已被 `.gitignore` 忽略，不要强制加入 Git。
 
 ### GPT-5 兼容服务的截图缩放
 
 部分 OpenAI-compatible 或 Azure 类服务不会正确处理 GPT-5 的 `"detail": "original"`，而是在服务端把大图短边缩放到 768px。模型返回的是缩放后图片中的绝对坐标，Midscene 如果仍按原始截图尺寸解释，就会产生固定比例的点击偏移。这个问题属于截图坐标协议不一致，不能通过修改操作提示词稳定解决。相关背景可参考 [GPT-5 配置说明](https://midscenejs.com/zh/model-common-config.html#gpt) 和 [使用 Azure OpenAI 时点击坐标偏移](https://midscenejs.com/zh/faq.html#%E4%BD%BF%E7%94%A8-azure-openai-%E6%97%B6%E7%82%B9%E5%87%BB%E5%9D%90%E6%A0%87%E5%81%8F%E7%A7%BB)。
 
-本仓库默认设置：
+本仓库的 YAML Case 直接设置：
 
-```dotenv
-ANDROID_SCREENSHOT_SHRINK_FACTOR="2"
+```yaml
+agent:
+  screenshotShrinkFactor: 2
 ```
 
 在本次真机环境中，Midscene 会在上传前完成以下缩放：
@@ -147,9 +147,9 @@ ANDROID_SCREENSHOT_SHRINK_FACTOR="2"
 1440x3200 -> 720x1600
 ```
 
-压缩后短边为 720px，不再触发兼容服务的 768px 服务端缩放；Midscene 同时知道压缩倍率，因此能够把模型坐标正确还原为真机坐标。对于其他设备，可按照“压缩后的短边不超过 768px”选择倍率。移动端通常从 `2` 开始验证，不建议超过 `3`，避免小字号文本变得难以识别。
+压缩后短边为 720px，不再触发兼容服务的 768px 服务端缩放；Midscene 同时知道压缩倍率，因此能够把模型坐标正确还原为真机坐标。对于其他设备，可按照“压缩后的短边不超过 768px”选择倍率，并同步修改 YAML Case。移动端通常从 `2` 开始验证，不建议超过 `3`，避免小字号文本变得难以识别。
 
-如果通过 Midscene Studio 执行，也要在 Studio 的 Agent 参数中单独配置 `screenshotShrinkFactor: 2`。脚本中的配置不会自动同步到 Studio。
+如果通过 Midscene Studio 执行，也要在 Studio 的 Agent 参数中单独配置 `screenshotShrinkFactor: 2`。YAML Case 中的配置不会自动同步到 Studio。
 
 ## 6. 检查环境
 
@@ -164,7 +164,7 @@ pnpm check:android
 - Android SDK 和 ADB。
 - 模型环境变量是否填写。
 - 是否存在已授权的 Android 真机。
-- 根据 `ANDROID_SCREENSHOT_SHRINK_FACTOR` 展示真机截图到模型截图的尺寸变化；GPT-5 配置下若压缩后短边仍超过 768px，则检查失败。
+- 按 YAML Case 使用的 `screenshotShrinkFactor: 2` 展示真机截图到模型截图的尺寸变化；GPT-5 配置下若压缩后短边仍超过 768px，则检查失败。
 - ADB 是否具备注入触摸事件的权限。检查会点击屏幕范围外的坐标，不会操作页面中的真实控件。
 - 多设备时是否指定了目标设备。
 - 真机上是否安装了 `com.ss.android.auto`。
@@ -194,7 +194,7 @@ adb shell pm list packages | grep -i auto
 
 这个 Demo 不要求登录。若 App 的版本要求登录才能访问“我的”，请由用户自行完成登录，不要把账号密码写进脚本。
 
-## 8. 运行首页到“我的”Demo
+## 8. 运行首页到“我的”YAML Case
 
 执行：
 
@@ -202,22 +202,20 @@ adb shell pm list packages | grep -i auto
 pnpm demo:home-to-profile
 ```
 
-脚本会：
+该命令实际执行：
+
+```bash
+midscene ./cases/01-home-to-profile.yaml
+```
+
+YAML Case 会：
 
 1. 连接指定真机。
 2. 启动懂车帝。
-3. 确保进入首页。
-4. 断言首页已经展示。
-5. 点击底部导航中的“我的”。
-6. 断言当前为“我的”页面。
+3. 点击底部导航中的“我的”。
+4. 断言当前为“我的”页面，且底部“我的”处于选中状态。
 
-成功后终端会输出：
-
-```text
-Demo 通过：已从懂车帝首页进入“我的”页面。
-```
-
-Midscene 同时会输出 HTML 报告路径。用浏览器打开报告，检查规划、点击位置、前后截图和断言结果。
+成功后 Midscene 会在终端输出执行结果和 HTML 报告路径。用浏览器打开报告，检查规划、点击位置、前后截图和断言结果。
 
 对于上述 `1440x3200` 真机，新报告中应看到：
 
@@ -226,7 +224,7 @@ shotSize: 720x1600
 shrunkShotToLogicalRatio: 1.875
 ```
 
-第一次点击应直接落在右下角“我的”，不应进入“懂车帝热榜”等屏幕中部入口。如果报告中的 `shotSize` 仍是 `1440x3200`，说明 Agent 没有读取到本仓库的压缩配置。
+第一次点击应直接落在右下角“我的”，不应进入“懂车帝热榜”等屏幕中部入口。如果报告中的 `shotSize` 仍是 `1440x3200`，请检查 YAML 中是否保留了 `screenshotShrinkFactor: 2`。
 
 ## 9. 本阶段验收清单
 

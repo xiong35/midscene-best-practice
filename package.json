@@ -12,10 +12,11 @@
   "scripts": {
     "check": "tsc --noEmit",
     "check:android": "tsx src/check-android.ts",
-    "demo:home-to-profile": "tsx src/demos/01-home-to-profile.ts"
+    "demo:home-to-profile": "midscene ./cases/01-home-to-profile.yaml"
   },
   "devDependencies": {
     "@midscene/android": "1.10.11",
+    "@midscene/cli": "1.10.11",
     "@types/node": "22.15.30",
     "dotenv": "17.4.2",
     "tsx": "4.23.12",
