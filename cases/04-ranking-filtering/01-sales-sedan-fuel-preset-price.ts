@@ -1,4 +1,5 @@
 import {
+  rankingTimeContext,
   readNonDefaultPresetPriceRange,
   reportCaseFailure,
   runRankingFilterCase,
@@ -16,6 +17,8 @@ runRankingFilterCase(
     );
     await agent.aiAssert(
       '“销量榜”“轿车”“上上个月月份”“燃油车”同时处于选中状态，所有筛选面板均已关闭，页面仍停留在排行榜，并且排行榜结果列表正常展示。',
+      undefined,
+      { context: rankingTimeContext },
     );
 
     await agent.aiAct(
@@ -27,6 +30,8 @@ runRankingFilterCase(
     );
     await agent.aiAssert(
       `“销量榜”“轿车”“上上个月月份”“燃油车”和预设价格区间“${priceRange}”已立即同时生效；筛选栏回显“${priceRange}”，页面展示当前组合条件下的排行榜结果列表。`,
+      undefined,
+      { context: rankingTimeContext },
     );
 
     console.log(

@@ -1,4 +1,5 @@
 import {
+  rankingTimeContext,
   readNonDefaultPresetPriceRange,
   reportCaseFailure,
   restoreRankingDefaults,
@@ -17,6 +18,8 @@ runRankingFilterCase(
     );
     await agent.aiAssert(
       '“销量榜”“轿车”“上上个月月份”“燃油车”同时处于选中状态，并且排行榜结果列表正常展示。',
+      undefined,
+      { context: rankingTimeContext },
     );
 
     await agent.aiAct(
@@ -28,11 +31,15 @@ runRankingFilterCase(
     );
     await agent.aiAssert(
       `“销量榜”“轿车”“上上个月月份”“燃油车”和预设价格区间“${priceRange}”同时生效，页面展示当前条件下的排行榜结果列表。`,
+      undefined,
+      { context: rankingTimeContext },
     );
 
     await agent.aiAct('将榜单从“销量榜”切换为“新能源榜”。');
     await agent.aiAssert(
       `“新能源榜”处于选中状态，“销量榜”已取消选中；车型、榜单时间、能源类型和价格均恢复为新能源榜的默认状态，“轿车”“上上个月月份”“燃油车”和“${priceRange}”均未继续生效；排行榜结果列表正常展示。`,
+      undefined,
+      { context: rankingTimeContext },
     );
 
     await agent.aiAct('在新能源榜中选择车型“SUV”。');

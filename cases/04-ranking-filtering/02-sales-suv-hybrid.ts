@@ -1,4 +1,5 @@
 import {
+  rankingTimeContext,
   reportCaseFailure,
   runRankingFilterCase,
 } from './ranking-filter-helpers.js';
@@ -14,6 +15,8 @@ runRankingFilterCase(
     );
     await agent.aiAssert(
       '“销量榜”“SUV”“上个月月份”“插电式混动”同时处于选中状态，页面仍停留在排行榜，并且展示当前组合条件下的排行榜结果列表。',
+      undefined,
+      { context: rankingTimeContext },
     );
 
     console.log('Case 通过：销量榜 + SUV + 上个月月份 + 插电式混动。');

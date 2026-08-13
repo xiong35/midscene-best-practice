@@ -27,14 +27,18 @@ function monthLabel(offset: number): string {
   return `${target.getUTCFullYear()}年${target.getUTCMonth() + 1}月`;
 }
 
-const rankingContext = `${navigationContext}
-
-## 当前年月
+// aiActContext 只会传给 aiAct，aiAssert 不会自动继承。
+// 单独导出同一份动态月份信息，供涉及相对月份的断言通过 options.context 显式复用。
+export const rankingTimeContext = `## 当前年月
 
 - 当前是 ${monthLabel(0)}。
 - “上个月月份”是 ${monthLabel(-1)}。
 - “上上个月月份”是 ${monthLabel(-2)}。
 - 选择榜单时间时严格使用以上对应关系，不要自行推测其他月份。`;
+
+const rankingContext = `${navigationContext}
+
+${rankingTimeContext}`;
 
 export type RankingFilterAgent = Awaited<
   ReturnType<typeof agentFromAdbDevice>
