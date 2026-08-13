@@ -87,6 +87,8 @@ AI 的作用是让信息更好读，不是替用户探索 App。生成后仍要�
 
 执行 YAML Case 需要安装 `@midscene/cli`。本仓库将它与 `@midscene/android` 固定在相同的 `1.10.11` 版本，安装依赖后会得到 `midscene` 命令。
 
+Midscene Case 既可以使用 YAML，也可以使用 TypeScript。这个阶段不需要在步骤之间传递动态数据，因此使用 YAML 会更简洁；如果后续场景需要复用 `aiQuery` 的结果、执行条件判断或组合其他程序逻辑，可以改用 TypeScript。两种形式使用相同的导航信息、模型配置、操作提示词和结果断言，不会改变“导航知识 + 测试目标”的整体工作流。真实动态数据的例子见[第三步：编写真实的基础用例](./03-write-real-base-case.md)。
+
 一份 Android YAML Case 主要由三部分组成：
 
 ```yaml
