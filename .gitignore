@@ -1,0 +1,12 @@
+node_modules/
+.env
+.DS_Store
+
+# Midscene runtime output
+midscene_run/
+reports/
+*.html
+
+# Local logs and temporary files
+*.log
+tmp/
