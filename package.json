@@ -12,7 +12,8 @@
   "scripts": {
     "check": "tsc --noEmit",
     "check:android": "tsx src/check-android.ts",
-    "demo:home-to-profile": "midscene ./cases/01-home-to-profile.yaml"
+    "demo:home-to-profile": "midscene ./cases/01-home-to-profile.yaml",
+    "demo:subscription-tabs": "midscene ./cases/02-subscription-tab-switch.yaml"
   },
   "devDependencies": {
     "@midscene/android": "1.10.11",
