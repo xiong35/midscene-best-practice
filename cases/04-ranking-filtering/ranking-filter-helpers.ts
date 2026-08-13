@@ -8,6 +8,34 @@ const navigationContext = readFileSync(
   'utf8',
 );
 
+const currentMonthParts = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'Asia/Shanghai',
+  year: 'numeric',
+  month: 'numeric',
+}).formatToParts(new Date());
+const currentYear = Number(
+  currentMonthParts.find((part) => part.type === 'year')?.value,
+);
+const currentMonth = Number(
+  currentMonthParts.find((part) => part.type === 'month')?.value,
+);
+
+function monthLabel(offset: number): string {
+  const target = new Date(
+    Date.UTC(currentYear, currentMonth - 1 + offset, 1),
+  );
+  return `${target.getUTCFullYear()}年${target.getUTCMonth() + 1}月`;
+}
+
+const rankingContext = `${navigationContext}
+
+## 当前年月
+
+- 当前是 ${monthLabel(0)}。
+- “上个月月份”是 ${monthLabel(-1)}。
+- “上上个月月份”是 ${monthLabel(-2)}。
+- 选择榜单时间时严格使用以上对应关系，不要自行推测其他月份。`;
+
 export type RankingFilterAgent = Awaited<
   ReturnType<typeof agentFromAdbDevice>
 >;
@@ -28,7 +56,7 @@ export async function runRankingFilterCase(
 
   const deviceId = process.env.ANDROID_DEVICE_ID?.trim() || undefined;
   const agent = await agentFromAdbDevice(deviceId, {
-    aiActContext: navigationContext,
+    aiActContext: rankingContext,
     screenshotShrinkFactor: 2,
     groupName: metadata.groupName,
     groupDescription: metadata.groupDescription,
