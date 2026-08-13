@@ -58,7 +58,7 @@ export async function readNonDefaultPresetPriceRange(
   agent: RankingFilterAgent,
 ): Promise<string> {
   const result = await agent.aiQuery<{ priceRange: string }>(
-    '{priceRange: string}，从当前页面价格筛选区域中读取一个实际展示、可选择且尚未选中的非默认预设价格区间。priceRange 必须是页面上的完整区间文案，不能是“全部”“不限”或默认项，也不能自行编造。',
+    '{priceRange: string}，从当前页面价格筛选区域中读取一个实际展示、可选择且尚未选中的非默认预设价格区间。优先选择最接近或覆盖15–30万的区间，避免筛选结果为空。priceRange 必须是页面上的完整区间文案，不能是“全部”“不限”或默认项，也不能自行编造。',
   );
   const priceRange =
     typeof result?.priceRange === 'string' ? result.priceRange.trim() : '';
