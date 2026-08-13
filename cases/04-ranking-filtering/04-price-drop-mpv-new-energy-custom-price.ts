@@ -35,20 +35,20 @@ runRankingFilterCase(
     await agent.aiAct(
       '只拖动当前位于“10”附近的最低价滑块，将它移动到“15”附近；不要操作屏幕边缘，完成后保持价格面板打开。',
     );
-    const { minPrice, maxPrice } = await readCustomPriceRange(agent);
+    const priceRange = await readCustomPriceRange(agent);
     await agent.aiAssert(
-      `价格筛选面板处于打开状态；自定义价格最低价为“${minPrice}”、最高价为“${maxPrice}”，区间在15–30万附近；任何预设价格区间均未显示为当前选中项。`,
+      `价格筛选面板处于打开状态；价格区间条下方显示的当前自定义价格完整文案为“${priceRange}”，该区间在15–30万附近；任何预设价格区间均未显示为当前选中项。`,
     );
 
     await agent.aiTap(
       '价格筛选面板底部的黄色确认按钮，按钮文案包含“款车系符合条件”。',
     );
     await agent.aiAssert(
-      `“降价榜”“MPV”“近一年”“新能源”和自定义价格范围“${minPrice}”至“${maxPrice}”同时生效；价格面板已关闭，筛选栏回显与该范围一致的价格条件，页面展示当前组合条件下的排行榜结果列表。`,
+      `“降价榜”“MPV”“近一年”“新能源”和自定义价格范围“${priceRange}”同时生效；价格面板已关闭，筛选栏回显“${priceRange}”，页面展示当前组合条件下的排行榜结果列表。`,
     );
 
     console.log(
-      `Case 通过：降价榜 + MPV + 近一年 + 新能源 + ${minPrice} 至 ${maxPrice}。`,
+      `Case 通过：降价榜 + MPV + 近一年 + 新能源 + ${priceRange}。`,
     );
   },
 ).catch(reportCaseFailure);

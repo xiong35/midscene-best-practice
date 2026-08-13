@@ -31,7 +31,7 @@ PRD 不描述如何点击，也不包含测试框架、基础 Case 或代码实�
 
 筛选项名称必须在 PRD 中明确。否则 AI 只能临时从页面上任选一个选项，虽然测试可能执行成功，却无法证明产品要求的真实组合是否可用。
 
-价格是一个例外：页面提供的预设价格档位可能随版本变化，所以 PRD 只要求选择一个真实存在的非默认档位；测试先读取页面上的完整文案，再把同一个文案用于操作和断言。自定义价格同样以拖动后页面实际显示的最低价和最高价为准。
+价格是一个例外：页面提供的预设价格档位可能随版本变化，所以 PRD 只要求选择一个真实存在的非默认档位；测试先读取页面上的完整文案，再把同一个文案用于操作和断言。自定义价格同样读取拖动后页面显示的一条完整区间文案。
 
 ## 2. 准备生成所需的上下文
 
@@ -80,7 +80,7 @@ PRD 不描述如何点击，也不包含测试框架、基础 Case 或代码实�
 | [`01-sales-sedan-fuel-preset-price.ts`](../cases/04-ranking-filtering/01-sales-sedan-fuel-preset-price.ts) | 销量榜 + 轿车 + 上上个月月份 + 燃油车 + 页面上的一个非默认预设价格 | 五个条件同时选中，结果列表正常展示 |
 | [`02-sales-suv-hybrid.ts`](../cases/04-ranking-filtering/02-sales-suv-hybrid.ts) | 销量榜 + SUV + 上个月月份 + 插电式混动 | 四个明确条件同时选中，结果列表正常展示 |
 | [`03-new-energy-suv-pure-electric-preset-price.ts`](../cases/04-ranking-filtering/03-new-energy-suv-pure-electric-preset-price.ts) | 新能源榜 + SUV + 近半年 + 纯电动 + 页面上的一个非默认预设价格 | 五个条件同时选中，结果列表正常展示 |
-| [`04-price-drop-mpv-new-energy-custom-price.ts`](../cases/04-ranking-filtering/04-price-drop-mpv-new-energy-custom-price.ts) | 降价榜 + MPV + 近一年 + 新能源 + 非默认自定义价格 | 读取并验证拖动后实际显示的最低价和最高价，旧预设价格不再选中 |
+| [`04-price-drop-mpv-new-energy-custom-price.ts`](../cases/04-ranking-filtering/04-price-drop-mpv-new-energy-custom-price.ts) | 降价榜 + MPV + 近一年 + 新能源 + 非默认自定义价格 | 读取并验证拖动后实际显示的完整价格区间文案，旧预设价格不再选中 |
 | [`05-switch-and-reset.ts`](../cases/04-ranking-filtering/05-switch-and-reset.ts) | 销量榜/轿车/上上个月月份/燃油车/价格，切换到新能源榜后再选择 SUV/插电式混动 | 切换榜单后旧筛选全部重置，并能在新榜单中建立筛选组合 |
 
 [`ranking-filter-helpers.ts`](../cases/04-ranking-filtering/ranking-filter-helpers.ts) 统一处理 Agent 配置、导航上下文、默认状态恢复和价格读取。这样每个 Case 只保留自己的业务操作与断言。
@@ -140,7 +140,7 @@ pnpm demo:ranking-filters
 - 是否按导航信息直接抵达排行榜，没有在首页无关区域探索。
 - 操作和断言中的榜单、车型、时间、能源是否与对应场景一致。
 - 预设价格是否来自真实页面，并在操作后保持选中。
-- 自定义价格是否读取并验证了页面实际显示的最低价和最高价。
+- 自定义价格是否读取并验证了页面实际显示的完整价格区间文案。
 - 切换后旧选项是否取消、其他维度是否保持。
 - 每次条件变化后结果列表是否正常展示。
 

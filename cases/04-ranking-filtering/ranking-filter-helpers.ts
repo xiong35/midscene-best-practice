@@ -100,28 +100,18 @@ export async function readNonDefaultPresetPriceRange(
   return priceRange;
 }
 
-export interface CustomPriceRange {
-  minPrice: string;
-  maxPrice: string;
-}
-
 export async function readCustomPriceRange(
   agent: RankingFilterAgent,
-): Promise<CustomPriceRange> {
-  const result = await agent.aiQuery<CustomPriceRange>(
-    '{minPrice: string, maxPrice: string}，读取当前价格区间条调整后页面实际展示的最低价和最高价。两个字段必须保留页面上的完整价格文案，不能根据区间条位置推测。',
+): Promise<string> {
+  const result = await agent.aiQuery<{ priceRange: string }>(
+    '{priceRange: string}，读取价格筛选面板中价格区间条下方明确显示的当前自定义价格区间完整文案。页面会用一条合并文案同时表示最低价和最高价，例如“15–30万”；请把这一个完整文案原样返回到 priceRange，不要拆成两个字段，不要读取预设价格选项，也不要根据滑块位置推测。',
   );
-  const minPrice =
-    typeof result?.minPrice === 'string' ? result.minPrice.trim() : '';
-  const maxPrice =
-    typeof result?.maxPrice === 'string' ? result.maxPrice.trim() : '';
-  if (!minPrice || !maxPrice) {
-    throw new Error('没有读取到自定义价格区间的最低价和最高价。');
+  const priceRange =
+    typeof result?.priceRange === 'string' ? result.priceRange.trim() : '';
+  if (!priceRange || priceRange === '不限' || priceRange === '全部') {
+    throw new Error('没有读取到页面明确显示的非默认自定义价格区间。');
   }
-  if (minPrice === maxPrice) {
-    throw new Error(`自定义价格区间无效：最低价和最高价均为“${minPrice}”。`);
-  }
-  return { minPrice, maxPrice };
+  return priceRange;
 }
 
 export function reportCaseFailure(error: unknown): void {
