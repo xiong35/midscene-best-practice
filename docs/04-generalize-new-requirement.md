@@ -21,8 +21,8 @@
 
 - 支持的榜单：销量榜、降价榜、新能源榜。
 - 支持的车型：轿车、SUV、MPV。
-- 支持的榜单时间：当月、上个月、近半年、近一年。
-- 支持的能源类型：新能源、燃油车、纯电动、混动。
+- 支持的榜单时间：当月月份、上个月月份、近半年、近一年。
+- 支持的能源类型：新能源、燃油车、纯电动、插电式混动。
 - 价格既可以选择页面给出的区间，也可以拖动价格区间条。
 - 不同维度可以组合，同一维度只能单选，并支持恢复默认状态。
 - 五个验收场景分别使用了哪些具体组合，以及每一步应该看到什么结果。
@@ -77,11 +77,11 @@ PRD 不描述如何点击，也不包含测试框架、基础 Case 或代码实�
 
 | Case | 真实筛选组合 | 核心验证 |
 | --- | --- | --- |
-| [`01-sales-sedan-fuel-preset-price.ts`](../cases/04-ranking-filtering/01-sales-sedan-fuel-preset-price.ts) | 销量榜 + 轿车 + 当月 + 燃油车 + 页面上的一个非默认预设价格 | 五个条件同时选中，结果列表正常展示 |
-| [`02-sales-suv-hybrid.ts`](../cases/04-ranking-filtering/02-sales-suv-hybrid.ts) | 销量榜 + SUV + 上个月 + 混动 | 四个明确条件同时选中，结果列表正常展示 |
+| [`01-sales-sedan-fuel-preset-price.ts`](../cases/04-ranking-filtering/01-sales-sedan-fuel-preset-price.ts) | 销量榜 + 轿车 + 当月月份 + 燃油车 + 页面上的一个非默认预设价格 | 五个条件同时选中，结果列表正常展示 |
+| [`02-sales-suv-hybrid.ts`](../cases/04-ranking-filtering/02-sales-suv-hybrid.ts) | 销量榜 + SUV + 上个月月份 + 插电式混动 | 四个明确条件同时选中，结果列表正常展示 |
 | [`03-new-energy-suv-pure-electric-preset-price.ts`](../cases/04-ranking-filtering/03-new-energy-suv-pure-electric-preset-price.ts) | 新能源榜 + SUV + 近半年 + 纯电动 + 页面上的一个非默认预设价格 | 五个条件同时选中，结果列表正常展示 |
 | [`04-price-drop-mpv-new-energy-custom-price.ts`](../cases/04-ranking-filtering/04-price-drop-mpv-new-energy-custom-price.ts) | 降价榜 + MPV + 近一年 + 新能源 + 非默认自定义价格 | 读取并验证拖动后实际显示的最低价和最高价，旧预设价格不再选中 |
-| [`05-switch-and-reset.ts`](../cases/04-ranking-filtering/05-switch-and-reset.ts) | 销量榜/轿车/当月/燃油车，逐维切换为新能源榜/SUV/上个月/混动 | 每次切换后新选项选中、旧选项取消、其他条件保持，最后恢复默认状态 |
+| [`05-switch-and-reset.ts`](../cases/04-ranking-filtering/05-switch-and-reset.ts) | 销量榜/轿车/当月月份/燃油车/价格，切换到新能源榜后再选择 SUV/插电式混动 | 切换榜单后旧筛选全部重置，并能在新榜单中建立筛选组合 |
 
 [`ranking-filter-helpers.ts`](../cases/04-ranking-filtering/ranking-filter-helpers.ts) 统一处理 Agent 配置、导航上下文、默认状态恢复和价格读取。这样每个 Case 只保留自己的业务操作与断言。
 
@@ -101,7 +101,7 @@ PRD 不描述如何点击，也不包含测试框架、基础 Case 或代码实�
 - 固定业务枚举是否直接使用 PRD 名称，动态数据是否只限于价格等运行时信息。
 - 从页面读取的价格文案是否传给了后续操作和断言。
 - 每个 Case 是否独立恢复初始状态，不依赖上一条测试。
-- 切换时是否同时验证新选项选中、旧选项取消和其他维度保持。
+- 切换榜单时是否验证旧筛选全部重置；同一榜单内组合筛选时，已有条件是否保持。
 - 断言是否验证业务状态，而不只是验证页面没有报错。
 - 是否没有操作需求范围外的关注、收藏等账号数据。
 
