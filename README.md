@@ -68,6 +68,13 @@ pnpm demo:ranking-filters
 │       ├── README.md
 │       ├── ranking-filter-helpers.ts
 │       └── run-all.ts
+├── reports/
+│   └── 04-ranking-filtering/
+│       ├── 01-sales-sedan-fuel-preset-price.html
+│       ├── 02-sales-suv-hybrid.html
+│       ├── 03-new-energy-suv-pure-electric-preset-price.html
+│       ├── 04-price-drop-mpv-new-energy-custom-price.html
+│       └── 05-switch-and-reset.html
 ├── knowledge/
 │   └── dongchedi-navigation.md
 ├── src/

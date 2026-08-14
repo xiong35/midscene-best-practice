@@ -117,6 +117,18 @@ AI 生成的 Case 运行效果可能不符合预期，假阳性或者假阴性�
 
 确认原因后，把失败报告、当前 Case 和补充的真实信息一起交给 AI，让它只修复失败 Case 或对应的公共辅助代码，再重新运行。修复过程中确认的新事实应回写 PRD 或 APP context 文档，供后续 Case 继续复用。
 
+### 五个 Case 的真机通过记录
+
+本仓库中的五个排行榜筛选 Case 已于 2026 年 8 月 13 日至 14 日使用 Android 真机和 `doubao-seed-2-1-pro` 模型实际执行通过，不只是通过了 TypeScript 静态检查。报告保留了每一步的屏幕截图、AI 规划、操作、数据提取和断言结果，可以用来直接检查 AI 是否按 APP context 文档抵达页面、是否正确执行 PRD 中的筛选组合。下载对应 HTML 文件后用浏览器打开即可查看完整过程。
+
+| Case | 真机验证结果 | 报告 |
+| --- | --- | --- |
+| [`01-sales-sedan-fuel-preset-price.ts`](../../cases/04-ranking-filtering/01-sales-sedan-fuel-preset-price.ts) | 通过：销量榜 + 轿车 + 上上个月月份 + 燃油车 + `18-25万` | [查看完整报告](../../reports/04-ranking-filtering/01-sales-sedan-fuel-preset-price.html) |
+| [`02-sales-suv-hybrid.ts`](../../cases/04-ranking-filtering/02-sales-suv-hybrid.ts) | 通过：销量榜 + SUV + 上个月月份 + 插电式混动 | [查看完整报告](../../reports/04-ranking-filtering/02-sales-suv-hybrid.html) |
+| [`03-new-energy-suv-pure-electric-preset-price.ts`](../../cases/04-ranking-filtering/03-new-energy-suv-pure-electric-preset-price.ts) | 通过：新能源榜 + SUV + 近半年 + 纯电动 + `25-35万` | [查看完整报告](../../reports/04-ranking-filtering/03-new-energy-suv-pure-electric-preset-price.html) |
+| [`04-price-drop-mpv-new-energy-custom-price.ts`](../../cases/04-ranking-filtering/04-price-drop-mpv-new-energy-custom-price.ts) | 通过：降价榜 + MPV + 近一年 + 新能源 + 自定义 `15-30万` | [查看完整报告](../../reports/04-ranking-filtering/04-price-drop-mpv-new-energy-custom-price.html) |
+| [`05-switch-and-reset.ts`](../../cases/04-ranking-filtering/05-switch-and-reset.ts) | 通过：切换榜单后旧筛选重置，并在新榜单中建立筛选组合 | [查看完整报告](../../reports/04-ranking-filtering/05-switch-and-reset.html) |
+
 ## 7. 可重复这条路径
 
 收到下一份需求时：
