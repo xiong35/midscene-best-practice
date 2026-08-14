@@ -1,47 +1,42 @@
 # 第一步：连接 Android 真机并运行首个 Demo
 
-这一阶段模拟用户第一次使用 Midscene：在 Mac 上连接一台 Android 真机，使用 Midscene Studio 验证设备，然后运行一条可复现的 YAML Case，从懂车帝首页进入“我的”页面。
+Midscene 是一款基于视觉的 UI 自动化 Agent：它对屏幕截图，交给视觉模型理解页面，再用自然语言指令（点击、断言、提取数据）操作真机，全程不依赖 App 源码、DOM 或测试专用接口。
 
-完成后应得到两个结果：
+这一阶段模拟用户第一次使用 Midscene 进行测试：在 Mac 上连接一台 Android 真机，运行一条 Hello World 的 YAML test case：从懂车帝首页进入“我的”页面。
 
-1. Midscene Studio 能识别并展示 Android 真机。
-2. `pnpm demo:home-to-profile` 执行成功，并生成一份 Midscene 报告。
+> Midscene 支持在不同平台上运行测试，可参考[官方文档](https://midscenejs.com/quick-start.html)进行配置。本例以较复杂的真机测试场景进行示范。
 
 ## 1. 环境要求
 
 - macOS 12 或更高版本。
 - Android 真机和一根支持数据传输的数据线。
-- Android Studio，或者单独安装的 Android SDK Platform Tools。
-- Midscene Studio Beta。
+- Android SDK Platform Tools（包含 ADB）。
 - Node.js `^20.19.0 || ^22.12.0 || >=24.0.0`。
 - pnpm `>=9.3.0`。
 - 一个 Midscene 支持的视觉模型及其 API Key。
-- 真机上已经安装懂车帝。
+- 真机上已经安装懂车帝 APP。
 
 本仓库初始化时验证过的本机环境为：
 
 ```text
-Midscene Studio: 1.10.11-beta-20260811112752.0
 @midscene/android: 1.10.11
 ADB: 37.0.1
 Node.js: 22.21.1
 pnpm: 9.3.0
-Java: 21.0.10
 Android SDK: ~/Library/Android/sdk
 ```
 
-版本不必完全相同，但 Node.js 和 pnpm 必须满足项目声明的范围。Studio 和 `@midscene/android` 建议使用相同的小版本。
+版本不必完全相同，但 Node.js 和 pnpm 必须满足项目声明的范围。
 
-## 2. 安装 Android SDK 和 ADB
+## 2. 安装 Android SDK Platform Tools
 
-如果已经安装 Android Studio：
+安装 Android SDK Platform Tools 后，确认 SDK 目录中存在可执行的 ADB：
 
-1. 打开 Android Studio。
-2. 进入 `Settings > Languages & Frameworks > Android SDK`。
-3. 在 `SDK Tools` 中确认 `Android SDK Platform-Tools` 已安装。
-4. 记下 Android SDK Location。
+```text
+<Android SDK 目录>/platform-tools/adb
+```
 
-将以下内容加入 `~/.zshrc`，路径以 Android Studio 展示的实际位置为准：
+将以下内容加入 `~/.zshrc`。示例使用 macOS 上常见的 SDK 位置；如果安装在其他目录，请替换为实际路径：
 
 ```bash
 export ANDROID_HOME="$HOME/Library/Android/sdk"
@@ -88,20 +83,7 @@ ABC123 device usb:1-1 product:xxx model:xxx device:xxx transport_id:1
 - `offline`：更换数据线或 USB 接口，然后执行 `adb kill-server` 和 `adb start-server`。
 - 列表为空：检查数据线是否支持传输、USB 模式以及 Platform Tools 是否安装。
 
-## 4. 使用 Midscene Studio 验证设备
-
-1. 打开 `Midscene Studio Beta`。
-2. 在 Overview 页面点击 `Refresh devices`。
-3. 确认 Android 区域出现刚连接的设备。
-4. 点击该设备，进入 Android Playground。
-5. 打开 `Model Config`，填写模型服务地址、API Key、模型名和正确的 Model Family。
-6. 保存后先执行一个无副作用的指令，例如“告诉我当前屏幕是什么页面”，确认截图和模型调用均正常。
-
-API Key 属于敏感信息，不要把它写进文档、截图或提交到 Git。
-
-Studio 仍显示 `No device` 时，先确认同一个终端中 `adb devices -l` 正常，再点击 `Refresh devices`。必要时完全退出并重启 Studio。
-
-## 5. 初始化项目配置
+## 4. 初始化项目配置
 
 在仓库根目录执行：
 
@@ -123,35 +105,13 @@ DONGCHEDI_PACKAGE="com.ss.android.auto"
 
 注意：
 
-- Studio 的 Model Config 和脚本的 `.env` 是两套入口，需要分别配置。
 - 只连接一台设备时可以不填 `ANDROID_DEVICE_ID`。
 - 多台设备同时连接时，从 `adb devices -l` 复制目标设备 ID。
-- `MIDSCENE_MODEL_FAMILY` 配置错误会导致视觉定位明显偏移。
+- `MIDSCENE_MODEL_FAMILY` 必须与实际模型对应，取值和查法见下文“关于 Model Family”。
 - `ANDROID_DEVICE_ID` 和 `DONGCHEDI_PACKAGE` 会替换 YAML Case 中的同名占位符；它们不是 Midscene 自动识别的标准环境变量。
 - `.env` 已被 `.gitignore` 忽略，不要强制加入 Git。
 
-### GPT-5 兼容服务的截图缩放
-
-部分 OpenAI-compatible 或 Azure 类服务不会正确处理 GPT-5 的 `"detail": "original"`，而是在服务端把大图短边缩放到 768px。模型返回的是缩放后图片中的绝对坐标，Midscene 如果仍按原始截图尺寸解释，就会产生固定比例的点击偏移。这个问题属于截图坐标协议不一致，不能通过修改操作提示词稳定解决。相关背景可参考 [GPT-5 配置说明](https://midscenejs.com/zh/model-common-config.html#gpt) 和 [使用 Azure OpenAI 时点击坐标偏移](https://midscenejs.com/zh/faq.html#%E4%BD%BF%E7%94%A8-azure-openai-%E6%97%B6%E7%82%B9%E5%87%BB%E5%9D%90%E6%A0%87%E5%81%8F%E7%A7%BB)。
-
-本仓库的 YAML Case 直接设置：
-
-```yaml
-agent:
-  screenshotShrinkFactor: 2
-```
-
-在本次真机环境中，Midscene 会在上传前完成以下缩放：
-
-```text
-1440x3200 -> 720x1600
-```
-
-压缩后短边为 720px，不再触发兼容服务的 768px 服务端缩放；Midscene 同时知道压缩倍率，因此能够把模型坐标正确还原为真机坐标。对于其他设备，可按照“压缩后的短边不超过 768px”选择倍率，并同步修改 YAML Case。移动端通常从 `2` 开始验证，不建议超过 `3`，避免小字号文本变得难以识别。
-
-如果通过 Midscene Studio 执行，也要在 Studio 的 Agent 参数中单独配置 `screenshotShrinkFactor: 2`。YAML Case 中的配置不会自动同步到 Studio。
-
-## 6. 检查环境
+## 5. 检查环境
 
 执行：
 
@@ -183,7 +143,7 @@ adb shell pm list packages | grep -i auto
 
 然后修改 `.env` 中的 `DONGCHEDI_PACKAGE`。
 
-## 7. 准备懂车帝
+## 6. 准备懂车帝 APP
 
 首次执行前人工确认：
 
@@ -194,7 +154,7 @@ adb shell pm list packages | grep -i auto
 
 这个 Demo 不要求登录。若 App 的版本要求登录才能访问“我的”，请由用户自行完成登录，不要把账号密码写进脚本。
 
-## 8. 运行首页到“我的”YAML Case
+## 7. 运行首页到“我的”YAML Case
 
 执行：
 
@@ -226,16 +186,41 @@ shrunkShotToLogicalRatio: 1.875
 
 第一次点击应直接落在右下角“我的”，不应进入“懂车帝热榜”等屏幕中部入口。如果报告中的 `shotSize` 仍是 `1440x3200`，请检查 YAML 中是否保留了 `screenshotShrinkFactor: 2`。
 
-## 9. 本阶段验收清单
+## 8. 本阶段验收清单
 
 - [ ] `adb devices -l` 中设备状态为 `device`。
 - [ ] `pnpm check:android` 显示“ADB 触摸注入权限正常”。
-- [ ] Studio Overview 中能够看到 Android 真机。
-- [ ] Studio 能成功获取手机截图并调用模型。
 - [ ] `pnpm check:android` 通过。
 - [ ] `pnpm check:android` 显示发送给模型的截图为 `720x1600`（以当前 `1440x3200` 真机为例）。
 - [ ] 懂车帝首页能够正常打开。
 - [ ] `pnpm demo:home-to-profile` 通过。
 - [ ] 报告中可以看到从首页进入“我的”的完整过程。
 
-完成以上项目后，再开始编写懂车帝导航文档。不要在基础环境和最小 Demo 尚未通过时提前调试复杂测试用例。
+## 附录
+
+### 关于 Model Family
+
+Model Family 告诉 Midscene 你用的是哪一类视觉模型，它决定了 Midscene 如何组织截图请求和解释模型返回的坐标。**填错不会报错，但会导致视觉定位明显偏移**，因此必须与你实际使用的模型对应。
+
+不同模型对应的取值（如 `qwen-vl`、`gpt-5`、`doubao-vision` 等）以及各自的完整配置方式，请以官方文档为准：[模型通用配置说明](https://midscenejs.com/zh/model-common-config.html)。如果不确定自己的服务属于哪一类，先在这份文档里找到对应的模型，再回填 `.env`。
+
+### 截图缩放：本项目统一使用 `screenshotShrinkFactor: 2`
+
+移动端真机分辨率很高，直接上传原图既慢又可能触发部分模型服务的服务端缩放。本项目在所有 YAML Case 中统一设置：
+
+```yaml
+agent:
+  screenshotShrinkFactor: 2
+```
+
+在本次 `1440x3200` 真机上，Midscene 会在上传前把截图压缩为 `720x1600`，并记住压缩倍率，从而把模型坐标正确还原为真机坐标。**选择倍率的经验法则：压缩后的短边不超过 768px。** 移动端通常从 `2` 开始验证，不建议超过 `3`，以免小字号文本难以识别。换设备时按此法则调整并同步修改 YAML Case。
+
+> 如果你使用 GPT-5 或 Azure OpenAI 兼容服务，这个 768px 阈值背后有一个具体的坐标偏移原因，详见文末[附录：GPT-5 兼容服务为什么要限制短边](#附录gpt-5-兼容服务为什么要限制短边)。其他模型可以忽略该附录。
+
+### GPT-5 兼容服务为什么要限制短边
+
+> 只有使用 GPT-5 或 Azure OpenAI 兼容服务时才需要关注本节；其他模型按上文 `screenshotShrinkFactor: 2` 配置即可。
+
+部分 OpenAI-compatible 或 Azure 类服务不会正确处理 GPT-5 的 `"detail": "original"`，而是在服务端把大图短边缩放到 768px。模型返回的是缩放后图片中的绝对坐标，Midscene 如果仍按原始截图尺寸解释，就会产生固定比例的点击偏移。这个问题属于截图坐标协议不一致，不能通过修改操作提示词稳定解决。
+
+上文把短边压到不超过 768px（本例为 720px），正是为了不再触发这类服务端二次缩放，让 Midscene 用自己已知的压缩倍率完成坐标还原。相关背景可参考 [GPT-5 配置说明](https://midscenejs.com/zh/model-common-config.html#gpt) 和 [使用 Azure OpenAI 时点击坐标偏移](https://midscenejs.com/zh/faq.html#%E4%BD%BF%E7%94%A8-azure-openai-%E6%97%B6%E7%82%B9%E5%87%BB%E5%9D%90%E6%A0%87%E5%81%8F%E7%A7%BB)。
