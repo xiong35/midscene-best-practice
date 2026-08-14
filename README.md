@@ -1,6 +1,6 @@
 # Midscene × 懂车帝：真实 App 测试最佳实践
 
-这个仓库从普通用户视角演示如何使用 Midscene 测试一款已经存在的 Android App
+这个仓库从普通用户视角演示如何使用 Midscene 测试一款已经存在的 Android App。
 
 > Midscene 是一款基于视觉的 UI 自动化 Agent：它对屏幕截图，交给视觉模型理解页面，再用自然语言指令操作真机。
 
@@ -15,7 +15,21 @@
 - [第四步：从新需求一键泛化多个 Case](./docs/04-ranking-filtering/README.md)
   把明确的筛选需求、APP context 文档和基础 Case 交给独立 AI，一次泛化出 5 个排行榜筛选 Case。
 
-测试 Case 可以使用 YAML 或 TypeScript。两者复用相同的 APP context 文档、提示词方法和执行环境；动态数据传递等部分能力需要使用 TypeScript 编写测试 Case
+## 最终成果：AI 生成 5 个 Case，真机 5/5 通过
+
+本仓库实践了这套方法，最终使用 AI 自动生成了一系列测试用例，并使用它们在真机上成功完成了测试验证。
+
+整体流程为：输入[APP context 文档](./knowledge/dongchedi-navigation.md) + [明确的产品需求](./docs/04-ranking-filtering/product-requirements.md) + [已跑通的基础 Case](./cases/03-follow-top-sales-car.ts) → 交给 AI → [批量生成 5 个排行榜筛选 Case](./cases/04-ranking-filtering/README.md) → 真机运行和报告验证 → **5/5 通过**
+
+| AI 生成的 Case | 覆盖场景 | 真机结果 |
+| --- | --- | --- |
+| [`01-sales-sedan-fuel-preset-price.ts`](./cases/04-ranking-filtering/01-sales-sedan-fuel-preset-price.ts) | 销量榜 + 轿车 + 燃油车 + 预设价格 | [通过，查看报告](./reports/04-ranking-filtering/01-sales-sedan-fuel-preset-price.html) |
+| [`02-sales-suv-hybrid.ts`](./cases/04-ranking-filtering/02-sales-suv-hybrid.ts) | 销量榜 + SUV + 插电式混动 | [通过，查看报告](./reports/04-ranking-filtering/02-sales-suv-hybrid.html) |
+| [`03-new-energy-suv-pure-electric-preset-price.ts`](./cases/04-ranking-filtering/03-new-energy-suv-pure-electric-preset-price.ts) | 新能源榜 + SUV + 纯电动 + 预设价格 | [通过，查看报告](./reports/04-ranking-filtering/03-new-energy-suv-pure-electric-preset-price.html) |
+| [`04-price-drop-mpv-new-energy-custom-price.ts`](./cases/04-ranking-filtering/04-price-drop-mpv-new-energy-custom-price.ts) | 降价榜 + MPV + 新能源 + 自定义价格 | [通过，查看报告](./reports/04-ranking-filtering/04-price-drop-mpv-new-energy-custom-price.html) |
+| [`05-switch-and-reset.ts`](./cases/04-ranking-filtering/05-switch-and-reset.ts) | 切换榜单后重置并重新组合筛选 | [通过，查看报告](./reports/04-ranking-filtering/05-switch-and-reset.html) |
+
+完整的生成、审核和失败修复过程见[第四步：从新需求一键泛化多个 Case](./docs/04-ranking-filtering/README.md)。
 
 ## 快速入口
 
