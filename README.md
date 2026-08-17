@@ -1,101 +1,91 @@
-# Midscene × 懂车帝：真实 App 测试最佳实践
+# Midscene：用 APP context 和产品需求泛化真实测试
 
-这个仓库从普通用户视角演示如何使用 Midscene 测试一款已经存在的 Android App。
+本仓库用懂车帝 Android App 演示一套可复用的 Midscene 测试方法：先把“怎么抵达页面、截图外还有什么”沉淀为 APP context 文档，再用明确的产品需求约束测试目标，最后让 AI 基于一条已跑通的基础 Case 批量生成新 Case。
 
-> Midscene 是一款基于视觉的 UI 自动化 Agent：它对屏幕截图，交给视觉模型理解页面，再用自然语言指令操作真机。
+## 三类信息各自负责什么
 
-整个实践由四篇文档承载，循序渐进：
+| 产物 | 负责回答 | 不应该包含 |
+| --- | --- | --- |
+| APP context 文档 | 怎么抵达页面、页面大致有什么、截图外还有什么 | 测试目标、断言、坐标和普通控件操作教程 |
+| 产品需求 | 产品支持什么、交互规则是什么、什么结果算正确 | 页面导航路径、测试代码和临时操作细节 |
+| 测试 Case | 本次测试什么组合、执行什么业务动作、验证什么结果 | 重复维护导航知识、临时猜测产品规则 |
 
-- [第一步：连接 Android 真机并运行首个 Demo](./docs/01-android-device-and-first-demo.md)
-  在 macOS 上准备 Android 真机与 Midscene，验证 ADB、模型配置和懂车帝安装状态，跑通首个“首页 → 我的”Case。
-- [第二步：探索 App 并编写 APP context 文档](./docs/02-explore-app-and-write-navigation-context.md)
-  把探索 App 得到的页面信息沉淀成可复用的 APP context 文档，让测试用例不再重复 setup 路径，仅通过 `aiActContext` 抵达目标页面；并用 YAML Case 验证“关注/订阅”Tab 往返切换。
-- [第三步：编写真实的基础用例](./docs/03-write-real-base-case.md)
-  动态读取销量榜第一名车型，添加关注，并在关注列表中验证同一辆车。
-- [第四步：从新需求一键泛化多个 Case](./docs/04-ranking-filtering/README.md)
-  把明确的筛选需求、APP context 文档和基础 Case 交给独立 AI，一次泛化出 5 个排行榜筛选 Case。
+这三类信息组合成完整工作流：
 
-## 最终成果：AI 生成 5 个 Case，真机 5/5 通过
+```text
+人工探索 App 编写 APP context 文档
+    +
+明确的产品需求
+    +
+一条已跑通的基础 Case
+    ↓
+AI 泛化多个 Case
+    ↓
+真机运行与报告验证
+```
 
-本仓库实践了这套方法，最终使用 AI 自动生成了一系列测试用例，并使用它们在真机上成功完成了测试验证。
+运行失败时也按相同边界修正：没有正确抵达页面就补 APP context，误解产品行为就补产品需求，单个步骤范围过大或目标含糊就修改 Case。
 
-整体流程为：输入[APP context 文档](./knowledge/dongchedi-navigation.md) + [明确的产品需求](./docs/04-ranking-filtering/product-requirements.md) + [已跑通的基础 Case](./cases/03-follow-top-sales-car.ts) → 交给 AI → [批量生成 5 个排行榜筛选 Case](./cases/04-ranking-filtering/README.md) → 真机运行和报告验证 → **5/5 通过**
+## 从这里开始
+
+核心方法只由三篇文档承载：
+
+1. [APP context 文档：作用、边界与产出方式](./docs/01-app-context.md)
+2. [把产品需求写成可泛化的测试输入](./docs/02-testable-product-requirements.md)
+3. [让 AI 泛化 Case，并通过真机报告持续修正](./docs/03-generalize-and-validate-cases.md)
+
+设备连接、模型配置和截图缩放是运行前提，统一放在[环境附录](./appendix/environment.md)供参考
+
+## 真实示例：AI 生成 5 个排行榜筛选 Case
+
+基于懂车帝的示例完整保留了从输入到结果的所有产物：
+
+- [APP context 文档](./examples/dongchedi/app-context.md)
+- [明确的排行榜筛选需求](./examples/dongchedi/features/ranking-filtering/product-requirements.md)
+- [已跑通的基础 Case](./examples/dongchedi/base-cases/follow-top-sales-car.ts)
+- [交给 AI 的生成指令](./examples/dongchedi/features/ranking-filtering/generate-cases.md)
+- [AI 生成的 Case 与真机报告](./examples/dongchedi/features/ranking-filtering/README.md)
+
+以下报告在 Android 真机上使用 `doubao-seed-2-1-turbo` 运行，5 个 Case 均通过。
 
 | AI 生成的 Case | 覆盖场景 | 真机结果 |
 | --- | --- | --- |
-| [`01-sales-sedan-fuel-preset-price.ts`](./cases/04-ranking-filtering/01-sales-sedan-fuel-preset-price.ts) | 销量榜 + 轿车 + 燃油车 + 预设价格 | [通过，查看报告](./reports/04-ranking-filtering/01-sales-sedan-fuel-preset-price.html) |
-| [`02-sales-suv-hybrid.ts`](./cases/04-ranking-filtering/02-sales-suv-hybrid.ts) | 销量榜 + SUV + 插电式混动 | [通过，查看报告](./reports/04-ranking-filtering/02-sales-suv-hybrid.html) |
-| [`03-new-energy-suv-pure-electric-preset-price.ts`](./cases/04-ranking-filtering/03-new-energy-suv-pure-electric-preset-price.ts) | 新能源榜 + SUV + 纯电动 + 预设价格 | [通过，查看报告](./reports/04-ranking-filtering/03-new-energy-suv-pure-electric-preset-price.html) |
-| [`04-price-drop-mpv-new-energy-custom-price.ts`](./cases/04-ranking-filtering/04-price-drop-mpv-new-energy-custom-price.ts) | 降价榜 + MPV + 新能源 + 自定义价格 | [通过，查看报告](./reports/04-ranking-filtering/04-price-drop-mpv-new-energy-custom-price.html) |
-| [`05-switch-and-reset.ts`](./cases/04-ranking-filtering/05-switch-and-reset.ts) | 切换榜单后重置并重新组合筛选 | [通过，查看报告](./reports/04-ranking-filtering/05-switch-and-reset.html) |
+| [`01-sales-sedan-fuel-preset-price.ts`](./examples/dongchedi/features/ranking-filtering/cases/01-sales-sedan-fuel-preset-price.ts) | 销量榜 + 轿车 + 燃油车 + 预设价格 | [通过，查看报告](./examples/dongchedi/features/ranking-filtering/reports/01-sales-sedan-fuel-preset-price.html) |
+| [`02-sales-suv-hybrid.ts`](./examples/dongchedi/features/ranking-filtering/cases/02-sales-suv-hybrid.ts) | 销量榜 + SUV + 插电式混动 | [通过，查看报告](./examples/dongchedi/features/ranking-filtering/reports/02-sales-suv-hybrid.html) |
+| [`03-new-energy-suv-pure-electric-preset-price.ts`](./examples/dongchedi/features/ranking-filtering/cases/03-new-energy-suv-pure-electric-preset-price.ts) | 新能源榜 + SUV + 纯电动 + 预设价格 | [通过，查看报告](./examples/dongchedi/features/ranking-filtering/reports/03-new-energy-suv-pure-electric-preset-price.html) |
+| [`04-price-drop-mpv-new-energy-custom-price.ts`](./examples/dongchedi/features/ranking-filtering/cases/04-price-drop-mpv-new-energy-custom-price.ts) | 降价榜 + MPV + 新能源 + 自定义价格 | [通过，查看报告](./examples/dongchedi/features/ranking-filtering/reports/04-price-drop-mpv-new-energy-custom-price.html) |
+| [`05-switch-and-reset.ts`](./examples/dongchedi/features/ranking-filtering/cases/05-switch-and-reset.ts) | 切换榜单后重置并重新组合筛选 | [通过，查看报告](./examples/dongchedi/features/ranking-filtering/reports/05-switch-and-reset.html) |
 
-完整的生成、审核和失败修复过程见[第四步：从新需求一键泛化多个 Case](./docs/04-ranking-filtering/README.md)。
+这些 Case 不是逐条录制出来的。AI 根据 APP context、产品需求和基础 Case 一次生成初稿，再通过真实报告定位问题，将新确认的事实回写到 APP context 或产品需求中。
 
-## 快速入口
-
-首次使用请先按[第一步](./docs/01-android-device-and-first-demo.md)完成 USB 调试授权、ADB 连接和模型配置：
-
-准备与环境检查：
+## 最小运行方式
 
 ```bash
 pnpm install
 cp .env.example .env
 pnpm check:android
-```
-
-最小 Demo：
-
-```bash
-pnpm demo:home-to-profile
-pnpm demo:subscription-tabs
-```
-
-真实业务 Demo（需要在懂车帝登录测试账号，会改动账号的关注状态）：
-
-```bash
-pnpm demo:follow-top-sales-car
 pnpm demo:ranking-filters
 ```
+
+基础 Case 和单个排行榜 Case 的命令见[懂车帝示例说明](./examples/dongchedi/README.md)。
 
 ## 目录结构
 
 ```text
 .
-├── docs/
-│   ├── 01-android-device-and-first-demo.md
-│   ├── 02-explore-app-and-write-navigation-context.md
-│   ├── 03-write-real-base-case.md
-│   └── 04-ranking-filtering/
-│       ├── README.md
-│       ├── product-requirements.md
-│       └── generate-ranking-filter-cases.md
-├── cases/
-│   ├── 01-home-to-profile.yaml
-│   ├── 02-subscription-tab-switch.yaml
-│   ├── 03-follow-top-sales-car.ts
-│   └── 04-ranking-filtering/
-│       ├── 01-sales-sedan-fuel-preset-price.ts
-│       ├── 02-sales-suv-hybrid.ts
-│       ├── 03-new-energy-suv-pure-electric-preset-price.ts
-│       ├── 04-price-drop-mpv-new-energy-custom-price.ts
-│       ├── 05-switch-and-reset.ts
-│       ├── README.md
-│       ├── ranking-filter-helpers.ts
-│       └── run-all.ts
-├── reports/
-│   └── 04-ranking-filtering/
-│       ├── 01-sales-sedan-fuel-preset-price.html
-│       ├── 02-sales-suv-hybrid.html
-│       ├── 03-new-energy-suv-pure-electric-preset-price.html
-│       ├── 04-price-drop-mpv-new-energy-custom-price.html
-│       └── 05-switch-and-reset.html
-├── knowledge/
-│   └── dongchedi-navigation.md
-├── src/
-│   └── check-android.ts
+├── docs/                         # 三篇可复用的方法文档
+├── examples/
+│   └── dongchedi/
+│       ├── app-context.md        # App 级共享知识
+│       ├── base-cases/           # 已跑通的工程模板
+│       └── features/
+│           └── ranking-filtering/
+│               ├── product-requirements.md
+│               ├── generate-cases.md
+│               ├── cases/
+│               └── reports/
+├── appendix/environment.md       # 简化后的运行环境说明
+├── tools/check-android.ts
 ├── .env.example
-├── package.json
-└── tsconfig.json
+└── package.json
 ```
-
-后续可以参考阶段四的方式，逐步扩展其他功能的需求文档和测试 Case。

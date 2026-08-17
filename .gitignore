@@ -7,9 +7,7 @@ midscene_run/
 *.html
 
 # Keep only curated reports that are referenced by the guide.
-reports/*
-!reports/04-ranking-filtering/
-!reports/04-ranking-filtering/*.html
+!examples/dongchedi/features/ranking-filtering/reports/*.html
 
 # Local logs and temporary files
 *.log

@@ -11,16 +11,16 @@
   },
   "scripts": {
     "check": "tsc --noEmit",
-    "check:android": "tsx src/check-android.ts",
-    "demo:home-to-profile": "midscene ./cases/01-home-to-profile.yaml",
-    "demo:subscription-tabs": "midscene ./cases/02-subscription-tab-switch.yaml",
-    "demo:follow-top-sales-car": "tsx cases/03-follow-top-sales-car.ts",
-    "demo:ranking-filter:sales-sedan-fuel": "tsx cases/04-ranking-filtering/01-sales-sedan-fuel-preset-price.ts",
-    "demo:ranking-filter:sales-suv-hybrid": "tsx cases/04-ranking-filtering/02-sales-suv-hybrid.ts",
-    "demo:ranking-filter:new-energy-suv-electric": "tsx cases/04-ranking-filtering/03-new-energy-suv-pure-electric-preset-price.ts",
-    "demo:ranking-filter:price-drop-mpv-custom-price": "tsx cases/04-ranking-filtering/04-price-drop-mpv-new-energy-custom-price.ts",
-    "demo:ranking-filter:switch-reset": "tsx cases/04-ranking-filtering/05-switch-and-reset.ts",
-    "demo:ranking-filters": "tsx cases/04-ranking-filtering/run-all.ts"
+    "check:android": "tsx tools/check-android.ts",
+    "demo:home-to-profile": "midscene ./examples/dongchedi/smoke/home-to-profile.yaml",
+    "demo:subscription-tabs": "midscene ./examples/dongchedi/base-cases/subscription-tab-switch.yaml",
+    "demo:follow-top-sales-car": "tsx examples/dongchedi/base-cases/follow-top-sales-car.ts",
+    "demo:ranking-filter:sales-sedan-fuel": "tsx examples/dongchedi/features/ranking-filtering/cases/01-sales-sedan-fuel-preset-price.ts",
+    "demo:ranking-filter:sales-suv-hybrid": "tsx examples/dongchedi/features/ranking-filtering/cases/02-sales-suv-hybrid.ts",
+    "demo:ranking-filter:new-energy-suv-electric": "tsx examples/dongchedi/features/ranking-filtering/cases/03-new-energy-suv-pure-electric-preset-price.ts",
+    "demo:ranking-filter:price-drop-mpv-custom-price": "tsx examples/dongchedi/features/ranking-filtering/cases/04-price-drop-mpv-new-energy-custom-price.ts",
+    "demo:ranking-filter:switch-reset": "tsx examples/dongchedi/features/ranking-filtering/cases/05-switch-and-reset.ts",
+    "demo:ranking-filters": "tsx examples/dongchedi/features/ranking-filtering/cases/run-all.ts"
   },
   "devDependencies": {
     "@midscene/android": "1.10.11",
